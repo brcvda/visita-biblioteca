@@ -3,10 +3,23 @@
 (function () {
   var slug = window.TAPPA_SLUG;
   var params = new URLSearchParams(window.location.search);
-  var modalitaFacile = params.get('facile') === '1';
-  if (modalitaFacile) document.body.classList.add('facile');
+
+  // Modalità: priorità a ?facile= esplicito in URL, poi alla preferenza
+  // salvata localmente (FR-008, consigliato), poi standard di default.
+  var STORAGE_KEY = 'vmb_modalita';
+  var modalitaFacile;
+  if (params.has('facile')) {
+    modalitaFacile = params.get('facile') === '1';
+    try { localStorage.setItem(STORAGE_KEY, modalitaFacile ? 'facile' : 'standard'); } catch (e) {}
+  } else {
+    var salvata = null;
+    try { salvata = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+    modalitaFacile = salvata === 'facile';
+  }
+  document.body.classList.toggle('facile', modalitaFacile);
 
   var root = document.getElementById('tappa-root');
+  var currentTappa = null;
 
   function el(tag, opts) {
     var node = document.createElement(tag);
@@ -28,16 +41,49 @@
     root.appendChild(box);
   }
 
+  function renderToggleModalita() {
+    var wrap = el('div', { className: 'mode-toggle' });
+    wrap.setAttribute('role', 'group');
+    wrap.setAttribute('aria-label', 'Modalità di visualizzazione');
+
+    var standardBtn = el('button', { className: 'mode-pill', text: 'Versione standard' });
+    var facileBtn = el('button', { className: 'mode-pill', text: 'Versione facile' });
+    standardBtn.setAttribute('aria-pressed', String(!modalitaFacile));
+    facileBtn.setAttribute('aria-pressed', String(modalitaFacile));
+    if (!modalitaFacile) standardBtn.classList.add('mode-pill--active');
+    if (modalitaFacile) facileBtn.classList.add('mode-pill--active');
+
+    standardBtn.addEventListener('click', function () { impostaModalita(false); });
+    facileBtn.addEventListener('click', function () { impostaModalita(true); });
+
+    wrap.appendChild(standardBtn);
+    wrap.appendChild(facileBtn);
+    root.appendChild(wrap);
+  }
+
+  function impostaModalita(facile) {
+    modalitaFacile = facile;
+    document.body.classList.toggle('facile', facile);
+    try { localStorage.setItem(STORAGE_KEY, facile ? 'facile' : 'standard'); } catch (e) {}
+    var url = new URL(window.location.href);
+    url.searchParams.set('facile', facile ? '1' : '0');
+    window.history.replaceState(null, '', url);
+    if (currentTappa) renderTappa(currentTappa);
+  }
+
   function renderTappa(t) {
+    currentTappa = t;
     document.title = t.titolo + ' — Visita in biblioteca';
     root.innerHTML = '';
+
+    renderToggleModalita();
 
     root.appendChild(el('p', { className: 'eyebrow', text: 'Tappa ' + t.numero + ' di 6' }));
     root.appendChild(el('h1', { text: t.titolo }));
     if (t.sottotitolo) root.appendChild(el('p', { className: 'subtitle', text: t.sottotitolo }));
 
     if (t.immagine && t.immagine.url) {
-      var frame = el('div', { className: 'image-frame' });
+      var frame = el('div', { className: 'image-frame' + (modalitaFacile ? ' image-frame--grande' : '') });
       var img = document.createElement('img');
       img.src = t.immagine.url;
       img.alt = t.immagine.alt || '';
@@ -83,14 +129,16 @@
       root.appendChild(details);
     }
 
-    if (t.curiosita) {
+    // "Lo sapevi?" e "Attività" sono contenuti facoltativi: nella versione
+    // facile restano nascosti per ridurre le opzioni (doc 02 §2).
+    if (t.curiosita && !modalitaFacile) {
       var curBox = el('div', { className: 'box' });
       curBox.appendChild(el('h2', { text: 'Lo sapevi?' }));
       curBox.appendChild(el('p', { text: t.curiosita }));
       root.appendChild(curBox);
     }
 
-    if (t.attivita) {
+    if (t.attivita && !modalitaFacile) {
       var attBox = el('div', { className: 'box' });
       attBox.style.borderLeftColor = 'var(--color-accent)';
       attBox.style.background = 'var(--color-bg-alt)';
@@ -115,23 +163,33 @@
     mappaLink.href = '../../mappa/';
     nav.appendChild(mappaLink);
 
-    var successivaBtn = el('button', { className: 'button button--muted', text: 'Tappa successiva' });
-    var statusNext = el('p', { className: 'nav-status' });
-    successivaBtn.addEventListener('click', function () {
-      statusNext.textContent = 'La tappa successiva arriverà nel prossimo step del prototipo.';
-    });
-    nav.appendChild(successivaBtn);
-    nav.appendChild(statusNext);
+    if (modalitaFacile) {
+      // Navigazione ridotta: solo Mappa e Home (meno opzioni, doc 02 §2).
+      var homeLink = el('a', { className: 'button button--secondary', text: 'Torna all\'inizio' });
+      homeLink.href = '../../';
+      nav.appendChild(homeLink);
+    } else {
+      var successivaBtn = el('button', { className: 'button button--muted', text: 'Tappa successiva' });
+      var statusNext = el('p', { className: 'nav-status' });
+      successivaBtn.addEventListener('click', function () {
+        statusNext.textContent = 'La tappa successiva arriverà nel prossimo step del prototipo.';
+      });
+      nav.appendChild(successivaBtn);
+      nav.appendChild(statusNext);
 
-    var terminaBtn = el('button', { className: 'button button--muted', text: 'Termina la visita' });
-    var statusEnd = el('p', { className: 'nav-status' });
-    terminaBtn.addEventListener('click', function () {
-      statusEnd.textContent = 'La pagina conclusiva arriverà in uno dei prossimi step.';
-    });
-    nav.appendChild(terminaBtn);
-    nav.appendChild(statusEnd);
+      var terminaBtn = el('button', { className: 'button button--muted', text: 'Termina la visita' });
+      var statusEnd = el('p', { className: 'nav-status' });
+      terminaBtn.addEventListener('click', function () {
+        statusEnd.textContent = 'La pagina conclusiva arriverà in uno dei prossimi step.';
+      });
+      nav.appendChild(terminaBtn);
+      nav.appendChild(statusEnd);
+    }
 
+    var infoLink = el('a', { className: 'footer-link', text: 'Informazioni (accessibilità, privacy, contatti)' });
+    infoLink.href = '../../informazioni/';
     root.appendChild(nav);
+    root.appendChild(infoLink);
   }
 
   root.innerHTML = '<p class="state-message">Caricamento della tappa…</p>';
