@@ -155,32 +155,42 @@
     renderNavigazione(t);
   }
 
+  var TOTALE_TAPPE = 6;
+
+  function hrefTappa(n) {
+    return '../0' + n + '/' + (modalitaFacile ? '?facile=1' : '');
+  }
+
   function renderNavigazione(t) {
+    var n = Number(t.numero);
     var nav = el('nav', { className: 'nav-tappa' });
     nav.setAttribute('aria-label', 'Navigazione della visita');
+
+    // Azione principale: tappa successiva oppure, all'ultima tappa, fine visita.
+    var principale;
+    if (n < TOTALE_TAPPE) {
+      principale = el('a', { className: 'button', text: 'Tappa successiva' });
+      principale.href = hrefTappa(n + 1);
+    } else {
+      principale = el('a', { className: 'button', text: 'Termina la visita' });
+      principale.href = '../../conclusione/' + (modalitaFacile ? '?facile=1' : '');
+    }
+    nav.appendChild(principale);
+
+    if (!modalitaFacile && n > 1) {
+      var prec = el('a', { className: 'button button--secondary', text: 'Tappa precedente' });
+      prec.href = hrefTappa(n - 1);
+      nav.appendChild(prec);
+    }
 
     var mappaLink = el('a', { className: 'button button--secondary', text: 'Mappa' });
     mappaLink.href = '../../mappa/';
     nav.appendChild(mappaLink);
 
-    var terminaLink = el('a', { className: 'button', text: 'Termina la visita' });
-    terminaLink.href = modalitaFacile ? '../../conclusione/?facile=1' : '../../conclusione/';
-
-    if (modalitaFacile) {
-      // Navigazione ridotta: Termina, Mappa, Home (meno opzioni, doc 02 §2).
-      nav.appendChild(terminaLink);
-      var homeLink = el('a', { className: 'button button--secondary', text: 'Torna all\'inizio' });
-      homeLink.href = '../../';
-      nav.appendChild(homeLink);
-    } else {
-      var successivaBtn = el('button', { className: 'button button--muted', text: 'Tappa successiva' });
-      var statusNext = el('p', { className: 'nav-status' });
-      successivaBtn.addEventListener('click', function () {
-        statusNext.textContent = 'La tappa successiva arriverà nel prossimo step del prototipo.';
-      });
-      nav.appendChild(successivaBtn);
-      nav.appendChild(statusNext);
-      nav.appendChild(terminaLink);
+    if (!modalitaFacile && n < TOTALE_TAPPE) {
+      var fine = el('a', { className: 'button button--secondary', text: 'Termina la visita' });
+      fine.href = '../../conclusione/';
+      nav.appendChild(fine);
     }
 
     var infoLink = el('a', { className: 'footer-link', text: 'Informazioni (accessibilità, privacy, contatti)' });

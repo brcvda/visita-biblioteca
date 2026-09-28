@@ -6,11 +6,11 @@
 
   var TUTTE_LE_TAPPE = [
     { numero: 1, titolo: 'Benvenuti in biblioteca', slug: 'benvenuti-in-biblioteca', path: '01' },
-    { numero: 2, titolo: 'Il viaggio di un libro' },
-    { numero: 3, titolo: 'Come trovare il libro che cerchi' },
-    { numero: 4, titolo: 'La biblioteca cresce con i suoi lettori' },
-    { numero: 5, titolo: 'La memoria del territorio' },
-    { numero: 6, titolo: 'La biblioteca oltre i libri' },
+    { numero: 2, titolo: 'Il viaggio di un libro', slug: 'il-viaggio-di-un-libro', path: '02' },
+    { numero: 3, titolo: 'Come trovare il libro che cerchi', slug: 'come-trovare-il-libro', path: '03' },
+    { numero: 4, titolo: 'La biblioteca cresce con i suoi lettori', slug: 'la-biblioteca-cresce', path: '04' },
+    { numero: 5, titolo: 'La memoria del territorio', slug: 'memoria-del-territorio', path: '05' },
+    { numero: 6, titolo: 'La biblioteca oltre i libri', slug: 'oltre-i-libri', path: '06' },
   ];
 
   function el(tag, opts) {
