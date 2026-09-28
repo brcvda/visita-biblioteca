@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Canale TV — Biblioteca</title>
+  <link rel="stylesheet" href="../assets/css/tv.css" />
+</head>
+<body>
+  <div class="stage">
+    <main class="area" id="area" aria-live="off">
+      <div class="slide" id="slide"></div>
+    </main>
+
+    <aside class="band" aria-label="Come iniziare la visita">
+      <p class="band-name">Biblioteca regionale<br />B. Salvadori</p>
+      <div class="band-qr" id="qr" role="img" aria-label="Codice QR per iniziare la visita"></div>
+      <p class="band-cta">Inquadra il codice per iniziare la visita</p>
+      <p class="band-url" id="url"></p>
+      <p class="band-note">Circa 15 minuti<br />Nessuna app<br />Nessuna registrazione</p>
+    </aside>
+
+    <!-- Piè tecnico: visibile solo al personale (tasto "i" oppure ?staff=1) -->
+    <footer class="tech" id="tech" hidden></footer>
+  </div>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/vendor/qrcode.js"></script>
+  <script src="../assets/js/tv.js"></script>
+</body>
+</html>
