@@ -163,8 +163,12 @@
     mappaLink.href = '../../mappa/';
     nav.appendChild(mappaLink);
 
+    var terminaLink = el('a', { className: 'button', text: 'Termina la visita' });
+    terminaLink.href = modalitaFacile ? '../../conclusione/?facile=1' : '../../conclusione/';
+
     if (modalitaFacile) {
-      // Navigazione ridotta: solo Mappa e Home (meno opzioni, doc 02 §2).
+      // Navigazione ridotta: Termina, Mappa, Home (meno opzioni, doc 02 §2).
+      nav.appendChild(terminaLink);
       var homeLink = el('a', { className: 'button button--secondary', text: 'Torna all\'inizio' });
       homeLink.href = '../../';
       nav.appendChild(homeLink);
@@ -176,14 +180,7 @@
       });
       nav.appendChild(successivaBtn);
       nav.appendChild(statusNext);
-
-      var terminaBtn = el('button', { className: 'button button--muted', text: 'Termina la visita' });
-      var statusEnd = el('p', { className: 'nav-status' });
-      terminaBtn.addEventListener('click', function () {
-        statusEnd.textContent = 'La pagina conclusiva arriverà in uno dei prossimi step.';
-      });
-      nav.appendChild(terminaBtn);
-      nav.appendChild(statusEnd);
+      nav.appendChild(terminaLink);
     }
 
     var infoLink = el('a', { className: 'footer-link', text: 'Informazioni (accessibilità, privacy, contatti)' });
