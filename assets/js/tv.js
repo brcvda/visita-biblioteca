@@ -78,16 +78,47 @@
 
   // -- Fascia persistente: QR e URL della visita (TV-02) ------------------------
 
-  // L'indirizzo si ricava dalla posizione reale della pagina (/tv/ -> radice del
-  // sito), cosi' QR e URL restano corretti anche dopo il passaggio al dominio
-  // istituzionale, senza modificare nulla.
-  var base = new URL('../', window.location.href);
-  base.search = '';
-  base.hash = '';
-  var visitaUrl = base.href;
-  document.getElementById('qr').innerHTML = qrSvg(visitaUrl);
-  document.getElementById('url').textContent =
-    visitaUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  // L'indirizzo viene dal foglio CONFIG (chiave "dominio"), cosi' resta corretto
+  // anche se la pagina viene aperta in modo diverso per una prova, e cambia da
+  // un solo punto quando si passa al dominio istituzionale definitivo. In
+  // attesa della prima risposta del foglio si usa, solo come ripiego
+  // immediato, l'indirizzo dedotto dalla posizione di questa stessa pagina.
+  var CONFIG_CACHE_KEY = 'vmb_tv_config_v1';
+  var qrEl = document.getElementById('qr');
+  var urlEl = document.getElementById('url');
+  var urlMostrato = null;
+
+  function baseDaPosizionePagina() {
+    var b = new URL('../', window.location.href);
+    b.search = ''; b.hash = '';
+    return b.href;
+  }
+
+  function mostraUrlVisita(url) {
+    if (!url || url === urlMostrato) return;
+    urlMostrato = url;
+    qrEl.innerHTML = qrSvg(url);
+    urlEl.textContent = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  }
+
+  mostraUrlVisita(baseDaPosizionePagina()); // visibile da subito, anche offline
+
+  (function caricaDominioConfigurato() {
+    try {
+      var cached = window.localStorage.getItem(CONFIG_CACHE_KEY);
+      if (cached) mostraUrlVisita(cached);
+    } catch (e) {}
+
+    fetch(API + '?action=config')
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (cfg) {
+        var dominio = cfg && cfg.dominio;
+        if (!dominio) return;
+        mostraUrlVisita(dominio);
+        try { window.localStorage.setItem(CONFIG_CACHE_KEY, dominio); } catch (e) {}
+      })
+      .catch(function () { /* resta l'indirizzo gia' mostrato (cache o pagina) */ });
+  })();
 
   // -- Dati: cache locale e feed --------------------------------------------------
 
