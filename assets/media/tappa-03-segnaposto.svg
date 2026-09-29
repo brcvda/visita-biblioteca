@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" role="img" aria-labelledby="t d">
+  <title id="t">Immagine segnaposto — Tappa 3</title>
+  <desc id="d">Segnaposto per il prototipo: da sostituire con una fotografia reale di questa tappa.</desc>
+  <rect width="360" height="240" fill="#f1ece0"/>
+  <rect x="1" y="1" width="358" height="238" fill="none" stroke="#dcd4c2" stroke-width="2"/>
+  <g fill="none" stroke="#7a5a2e" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.75">
+    <circle cx="150" cy="100" r="55"/><line x1="190" y1="140" x2="250" y2="200"/>
+  </g>
+  <text x="180" y="222" text-anchor="middle" font-family="Arial, sans-serif" font-size="15"
+        font-weight="700" fill="#4b5a66" letter-spacing="0.5">SEGNAPOSTO — TAPPA 3</text>
+</svg>
