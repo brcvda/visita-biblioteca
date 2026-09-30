@@ -78,21 +78,15 @@
 
   // -- Fascia persistente: QR e URL della visita (TV-02) ------------------------
 
-  // L'indirizzo viene dal foglio CONFIG (chiave "dominio"), cosi' resta corretto
-  // anche se la pagina viene aperta in modo diverso per una prova, e cambia da
-  // un solo punto quando si passa al dominio istituzionale definitivo. In
-  // attesa della prima risposta del foglio si usa, solo come ripiego
-  // immediato, l'indirizzo dedotto dalla posizione di questa stessa pagina.
+  // L'indirizzo viene dal foglio CONFIG (chiave "dominio"). In attesa della
+  // prima risposta del foglio, o se il foglio non e' raggiungibile, si mostra
+  // comunque l'indirizzo pubblico corretto — mai un percorso locale o di prova
+  // (es. file:///... quando la pagina viene aperta da un PC per un controllo).
+  var URL_PRODUZIONE = 'https://brcvda.github.io/visita-biblioteca/';
   var CONFIG_CACHE_KEY = 'vmb_tv_config_v1';
   var qrEl = document.getElementById('qr');
   var urlEl = document.getElementById('url');
   var urlMostrato = null;
-
-  function baseDaPosizionePagina() {
-    var b = new URL('../', window.location.href);
-    b.search = ''; b.hash = '';
-    return b.href;
-  }
 
   function mostraUrlVisita(url) {
     if (!url || url === urlMostrato) return;
@@ -101,7 +95,7 @@
     urlEl.textContent = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
   }
 
-  mostraUrlVisita(baseDaPosizionePagina()); // visibile da subito, anche offline
+  mostraUrlVisita(URL_PRODUZIONE); // visibile da subito, anche offline
 
   (function caricaDominioConfigurato() {
     try {
@@ -117,7 +111,7 @@
         mostraUrlVisita(dominio);
         try { window.localStorage.setItem(CONFIG_CACHE_KEY, dominio); } catch (e) {}
       })
-      .catch(function () { /* resta l'indirizzo gia' mostrato (cache o pagina) */ });
+      .catch(function () { /* resta l'indirizzo di produzione gia' mostrato */ });
   })();
 
   // -- Dati: cache locale e feed --------------------------------------------------
