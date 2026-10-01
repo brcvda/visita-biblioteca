@@ -176,6 +176,19 @@
   // -- Costruzione delle schermate ------------------------------------------------
 
   function build(c) {
+    // Locandina evento: layout a parte, l'immagine e' il contenuto stesso,
+    // non un'illustrazione accanto a un testo (doc discusso in chat).
+    if (c.tipo === 'locandina') {
+      var wrap = h('div', 'locandina-wrap');
+      wrap.appendChild(h('p', 'label', 'Evento del ' + (c.data_evento || '')));
+      var poster = document.createElement('img');
+      poster.className = 'locandina-img';
+      poster.alt = (c.immagine && c.immagine.alt) || 'Locandina evento';
+      if (c.immagine && c.immagine.url) poster.src = c.immagine.url;
+      wrap.appendChild(poster);
+      return { nodes: [wrap], conImmagine: false };
+    }
+
     var col = h('div', 'slide-text');
     col.appendChild(h('p', 'label', ETICHETTE[c.tipo] || ''));
     col.appendChild(h('h1', 'title', c.titolo));
