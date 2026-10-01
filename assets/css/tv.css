@@ -71,6 +71,26 @@ html, body {
   display: block;
 }
 
+/* Locandina evento: l'immagine e' il contenuto, mostrata intera (non
+   ritagliata) perche' e' quasi sempre verticale in un'area orizzontale. */
+.locandina-wrap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 20);
+}
+.locandina-img {
+  max-width: 100%;
+  max-height: calc(var(--u) * 800);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: calc(var(--u) * 6);
+  box-shadow: 0 calc(var(--u) * 6) calc(var(--u) * 24) rgba(0, 0, 0, 0.35);
+}
+
 .label {
   margin: 0 0 calc(var(--u) * 22);
   font-size: calc(var(--u) * 36);
@@ -168,24 +188,11 @@ html, body {
   background: #fff; /* zona di silenzio bianca attorno al codice */
   width: calc(var(--u) * 300);
   height: calc(var(--u) * 300);
-  padding: calc(var(--u) * 18);
+  padding: calc(var(--u) * 14);
   border: calc(var(--u) * 3) solid var(--ink);
   border-radius: calc(var(--u) * 6);
 }
 .band-qr svg { width: 100%; height: 100%; display: block; }
-.band-cta-box {
-  background: var(--card);
-  border-radius: calc(var(--u) * 8);
-  padding: calc(var(--u) * 14) calc(var(--u) * 26);
-}
-.band-cta {
-  margin: 0;
-  font-size: calc(var(--u) * 30);
-  font-weight: 700;
-  line-height: 1.25;
-  color: var(--ink);
-  max-width: calc(var(--u) * 420);
-}
 .band-url {
   margin: 0;
   font-size: calc(var(--u) * 28);
