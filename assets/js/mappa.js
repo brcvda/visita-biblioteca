@@ -1,17 +1,9 @@
-// Mappa/elenco delle tappe. Le tappe pubblicate arrivano dal feed;
-// quelle non ancora pubblicate sono mostrate come "in arrivo" per
-// dare comunque un'anteprima del percorso completo (doc 02 §3).
+// Mappa/elenco delle tappe. L'elenco completo (anche le tappe non ancora
+// pubblicate, mostrate come "in arrivo") viene dall'indice del foglio
+// Google — non e' piu' scritto a mano qui: aggiungere una tappa nel foglio
+// la fa comparire automaticamente anche in questa pagina.
 (function () {
   var root = document.getElementById('mappa-root');
-
-  var TUTTE_LE_TAPPE = [
-    { numero: 1, titolo: 'Benvenuti in biblioteca', slug: 'benvenuti-in-biblioteca', path: '01' },
-    { numero: 2, titolo: 'Il viaggio di un libro', slug: 'il-viaggio-di-un-libro', path: '02' },
-    { numero: 3, titolo: 'Come trovare il libro che cerchi', slug: 'come-trovare-il-libro', path: '03' },
-    { numero: 4, titolo: 'La biblioteca cresce con i suoi lettori', slug: 'la-biblioteca-cresce', path: '04' },
-    { numero: 5, titolo: 'La memoria del territorio', slug: 'memoria-del-territorio', path: '05' },
-    { numero: 6, titolo: 'La biblioteca oltre i libri', slug: 'oltre-i-libri', path: '06' },
-  ];
 
   function el(tag, opts) {
     var node = document.createElement(tag);
@@ -21,23 +13,26 @@
     return node;
   }
 
-  function renderElenco(pubblicate) {
-    var pubblicateSlugs = pubblicate.map(function (t) { return t.slug; });
+  function pathDaNumero(n) {
+    return n < 10 ? '0' + n : String(n);
+  }
+
+  function renderElenco(indice) {
     var list = el('ul', { className: 'stop-list' });
 
-    TUTTE_LE_TAPPE.forEach(function (t) {
+    indice.forEach(function (t) {
       var li = document.createElement('li');
-      var pubblicata = pubblicateSlugs.indexOf(t.slug) !== -1;
+      var numeroTxt = String(t.numero).padStart(2, '0');
 
-      if (pubblicata && t.path) {
+      if (t.pubblicata) {
         var a = document.createElement('a');
-        a.href = '../q/' + t.path + '/';
-        a.innerHTML = '<span class="stop-number">' + String(t.numero).padStart(2, '0') + '</span> ' + t.titolo;
+        a.href = '../q/' + pathDaNumero(t.numero) + '/';
+        a.innerHTML = '<span class="stop-number">' + numeroTxt + '</span> ' + t.titolo;
         li.appendChild(a);
       } else {
         li.className = 'stop-muted';
-        li.innerHTML = '<span class="stop-number">' + String(t.numero).padStart(2, '0') + '</span> ' +
-          t.titolo + ' — in arrivo';
+        li.innerHTML = '<span class="stop-number">' + numeroTxt + '</span> ' +
+          (t.titolo || 'Tappa ' + t.numero) + ' — in arrivo';
       }
       list.appendChild(li);
     });
@@ -50,11 +45,12 @@
 
   window.VisitaAPI.get()
     .then(function (data) {
-      renderElenco((data && data.tappe) || []);
+      renderElenco((data && data.indice) || []);
     })
     .catch(function () {
-      // Anche in errore di rete mostriamo l'elenco completo come "in arrivo":
-      // meglio orientamento parziale che una pagina vuota (NFR-03).
-      renderElenco([]);
+      // Errore di rete: meglio un messaggio chiaro che una pagina vuota (NFR-03).
+      root.innerHTML = '';
+      root.appendChild(el('p', { className: 'state-message',
+        text: 'Non riusciamo a caricare la mappa. Controlla la connessione e riprova.' }));
     });
 })();
