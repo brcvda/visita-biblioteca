@@ -125,26 +125,20 @@ html, body {
   color: #cfc8b8;
 }
 
-/* Elenco delle sei tappe */
+/* Elenco delle tappe (adattato per 8 voci) */
 .tappe-list {
   list-style: none;
-  margin: calc(var(--u) * 40) 0 0;
+  margin: calc(var(--u) * 20) 0 0; /* Ridotto da 40 a 20 per recuperare spazio in alto */
   padding: 0;
   display: grid;
-  gap: calc(var(--u) * 22);
+  gap: calc(var(--u) * 12); /* Ridotto da 22 a 12 per avvicinare le righe */
 }
 .tappe-list li {
   display: flex;
   align-items: baseline;
-  gap: calc(var(--u) * 28);
-  font-size: calc(var(--u) * 50);
+  gap: calc(var(--u) * 24); /* Leggermente ridotto per avvicinare il numero al testo */
+  font-size: calc(var(--u) * 40); /* Ridotto da 50 a 40 per far stare 8 righe */
   line-height: 1.15;
-}
-.tappe-list .num {
-  min-width: calc(var(--u) * 72);
-  font-family: var(--font-display);
-  font-weight: 600;
-  color: var(--brass-light);
 }
 
 /* QR secondario (solo biblioteca sonora, se attivato) */
