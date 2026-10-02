@@ -1,7 +1,9 @@
-// Renderizza la tappa identificata da window.TAPPA_SLUG (impostato inline
-// nella pagina /q/xx/index.html) leggendo il feed Apps Script.
+// Renderizza la tappa corrispondente a QUESTA pagina. Il numero di tappa si
+// ricava dalla cartella in cui si trova la pagina stessa (/q/07/ -> 7): ogni
+// pagina /q/0N/index.html e' quindi identica a tutte le altre, parola per
+// parola. Aggiungere una tappa = duplicare una cartella esistente e
+// rinominarla; non c'e' nessuno slug o numero da scrivere dentro il file.
 (function () {
-  var slug = window.TAPPA_SLUG;
   var params = new URLSearchParams(window.location.search);
 
   // Modalità: priorità a ?facile= esplicito in URL, poi alla preferenza
@@ -20,6 +22,15 @@
 
   var root = document.getElementById('tappa-root');
   var currentTappa = null;
+  var indiceTappe = []; // tutte le tappe del foglio (pubblicate o no): serve solo a sapere se esiste una "successiva"
+
+  function numeroTappaDaUrl() {
+    var parti = window.location.pathname.split('/').filter(Boolean);
+    var i = parti.indexOf('q');
+    if (i === -1 || !parti[i + 1]) return null;
+    var n = parseInt(parti[i + 1], 10);
+    return isNaN(n) ? null : n;
+  }
 
   function el(tag, opts) {
     var node = document.createElement(tag);
@@ -30,10 +41,10 @@
     return node;
   }
 
-  function renderErrore(messaggio) {
+  function renderErrore(titolo, messaggio) {
     root.innerHTML = '';
     var box = el('div', { className: 'state-message' });
-    box.appendChild(el('h2', { text: 'Non riusciamo a mostrare questa tappa' }));
+    box.appendChild(el('h2', { text: titolo }));
     box.appendChild(el('p', { text: messaggio }));
     var link = el('a', { className: 'button', text: 'Torna alla home' });
     link.href = '../../';
@@ -73,12 +84,13 @@
 
   function renderTappa(t) {
     currentTappa = t;
+    var totaleTappe = indiceTappe.length || Number(t.numero);
     document.title = t.titolo + ' — Visita in biblioteca';
     root.innerHTML = '';
 
     renderToggleModalita();
 
-    root.appendChild(el('p', { className: 'eyebrow', text: 'Tappa ' + t.numero + ' di 6' }));
+    root.appendChild(el('p', { className: 'eyebrow', text: 'Tappa ' + t.numero + ' di ' + totaleTappe }));
     root.appendChild(el('h1', { text: t.titolo }));
     if (t.sottotitolo) root.appendChild(el('p', { className: 'subtitle', text: t.sottotitolo }));
 
@@ -97,7 +109,6 @@
 
     // Audio: nessun autoplay, avviato solo su azione esplicita (FR-004)
     if (t.audio && t.audio.url) {
-      var audioWrap = el('div', { className: 'divider' === null ? '' : '' });
       var playBtn = el('button', { className: 'button button--secondary', text: 'Ascolta l\'audio della tappa' });
       var audioEl = null;
       playBtn.addEventListener('click', function () {
@@ -155,20 +166,22 @@
     renderNavigazione(t);
   }
 
-  var TOTALE_TAPPE = 6;
-
   function hrefTappa(n) {
-    return '../0' + n + '/' + (modalitaFacile ? '?facile=1' : '');
+    var nn = n < 10 ? '0' + n : String(n);
+    return '../' + nn + '/' + (modalitaFacile ? '?facile=1' : '');
   }
 
   function renderNavigazione(t) {
     var n = Number(t.numero);
+    // "Esiste una prossima tappa?" si ricava dall'indice del foglio (anche se
+    // non ancora pubblicata), non da un numero fisso scritto nel codice.
+    var esisteSuccessiva = indiceTappe.some(function (x) { return x.numero === n + 1; });
+
     var nav = el('nav', { className: 'nav-tappa' });
     nav.setAttribute('aria-label', 'Navigazione della visita');
 
-    // Azione principale: tappa successiva oppure, all'ultima tappa, fine visita.
     var principale;
-    if (n < TOTALE_TAPPE) {
+    if (esisteSuccessiva) {
       principale = el('a', { className: 'button', text: 'Tappa successiva' });
       principale.href = hrefTappa(n + 1);
     } else {
@@ -187,7 +200,7 @@
     mappaLink.href = '../../mappa/';
     nav.appendChild(mappaLink);
 
-    if (!modalitaFacile && n < TOTALE_TAPPE) {
+    if (!modalitaFacile && esisteSuccessiva) {
       var fine = el('a', { className: 'button button--secondary', text: 'Termina la visita' });
       fine.href = '../../conclusione/';
       nav.appendChild(fine);
@@ -201,15 +214,28 @@
 
   root.innerHTML = '<p class="state-message">Caricamento della tappa…</p>';
 
-  window.VisitaAPI.getTappaBySlug(slug)
-    .then(function (t) {
-      if (!t) {
-        renderErrore('Questa tappa non è al momento pubblicata.');
-        return;
+  var numero = numeroTappaDaUrl();
+  if (numero === null) {
+    renderErrore('Indirizzo non valido', 'Questa pagina non si trova nella cartella /q/NN/ prevista.');
+    return;
+  }
+
+  window.VisitaAPI.get()
+    .then(function (data) {
+      indiceTappe = (data && data.indice) || [];
+      var pubblicate = (data && data.tappe) || [];
+      var t = pubblicate.filter(function (x) { return Number(x.numero) === numero; })[0];
+
+      if (t) { renderTappa(t); return; }
+
+      var vocePrevista = indiceTappe.filter(function (x) { return x.numero === numero; })[0];
+      if (vocePrevista) {
+        renderErrore('Tappa non ancora pubblicata', 'Questa tappa non è al momento pubblicata.');
+      } else {
+        renderErrore('Tappa non trovata', 'Non esiste una tappa numero ' + numero + ' nel foglio.');
       }
-      renderTappa(t);
     })
     .catch(function () {
-      renderErrore('Controlla la connessione e riprova. Se il problema continua, torna alla home.');
+      renderErrore('Problema di connessione', 'Controlla la connessione e riprova. Se il problema continua, torna alla home.');
     });
 })();
