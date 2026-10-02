@@ -180,7 +180,6 @@
     // non un'illustrazione accanto a un testo (doc discusso in chat).
     if (c.tipo === 'locandina') {
       var wrap = h('div', 'locandina-wrap');
-      wrap.appendChild(h('p', 'label', 'Evento del ' + (c.data_evento || '')));
       var poster = document.createElement('img');
       poster.className = 'locandina-img';
       poster.alt = (c.immagine && c.immagine.alt) || 'Locandina evento';
