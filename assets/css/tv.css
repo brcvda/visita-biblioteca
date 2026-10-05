@@ -140,6 +140,12 @@ html, body {
   font-size: calc(var(--u) * 40); /* Ridotto da 50 a 40 per far stare 8 righe */
   line-height: 1.15;
 }
+.tappe-list .num {
+  min-width: calc(var(--u) * 72);
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--brass-light);
+}
 
 /* QR secondario (solo biblioteca sonora, se attivato) */
 .qr-secondary {
