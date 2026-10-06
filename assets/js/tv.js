@@ -48,6 +48,16 @@
     biblioteca_sonora: 'Da ascoltare',
   };
 
+  // Scritta accanto al QR secondario (vedi piu' sotto, dentro build()),
+  // per tipo di contenuto. _default copre un tipo non elencato qui.
+  var QR_SECONDARIO_ETICHETTE = {
+    biblioteca_sonora: 'Ascolta subito',
+    evento: 'Dettagli evento',
+    libro: 'Scopri il libro',
+    servizio: 'Scopri il servizio',
+    _default: 'Scopri di più',
+  };
+
   // -- Utilità -----------------------------------------------------------------
 
   function h(tag, cls, text) {
@@ -185,7 +195,7 @@
       poster.alt = (c.immagine && c.immagine.alt) || 'Locandina evento';
       if (c.immagine && c.immagine.url) poster.src = c.immagine.url;
       wrap.appendChild(poster);
-      return { nodes: [wrap], conImmagine: false };
+      return { nodes: [wrap], conImmagine: false, poster: true };
     }
 
     var col = h('div', 'slide-text');
@@ -211,13 +221,16 @@
       col.appendChild(ol);
     }
 
-    // QR secondario: solo se richiesto e con un URL http(s) valido (doc 03 §11).
-    if (c.tipo === 'biblioteca_sonora' && c.qr_facoltativo && /^https?:\/\//.test(c.url || '')) {
+    // QR secondario: su qualunque tipo di contenuto (non solo biblioteca_sonora),
+    // purche' richiesto in foglio (qr_facoltativo = si) e con un URL http(s)
+    // valido nella stessa riga (doc 03 §11). La scritta accanto al QR cambia
+    // in base al tipo, per restare pertinente al contenuto mostrato.
+    if (c.qr_facoltativo && /^https?:\/\//.test(c.url || '')) {
       var box = h('div', 'qr-secondary');
       var qb = h('div', 'qr-box');
       qb.innerHTML = qrSvg(c.url);
       box.appendChild(qb);
-      box.appendChild(h('span', null, 'Ascolta subito'));
+      box.appendChild(h('span', null, QR_SECONDARIO_ETICHETTE[c.tipo] || QR_SECONDARIO_ETICHETTE._default));
       col.appendChild(box);
     }
 
@@ -239,6 +252,8 @@
     return { nodes: nodes, conImmagine: conImmagine };
   }
 
+  var areaEl = document.getElementById('area');
+
   function mostra(c) {
     slide.classList.add('is-out');
     setTimeout(function () {
@@ -246,6 +261,7 @@
       slide.textContent = '';
       built.nodes.forEach(function (n) { slide.appendChild(n); });
       slide.className = 'slide' + (built.conImmagine ? ' with-image' : '') + ' is-out';
+      areaEl.classList.toggle('area--poster', !!built.poster);
       void slide.offsetWidth; // forza il ricalcolo prima di riattivare la dissolvenza
       slide.classList.remove('is-out');
     }, reduceMotion ? 0 : FADE_MS);
