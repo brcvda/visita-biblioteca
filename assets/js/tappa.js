@@ -20,6 +20,11 @@
   }
   document.body.classList.toggle('facile', modalitaFacile);
 
+  // Pulsanti "Versione standard / Versione breve" temporaneamente disattivati
+  // (restano visibili solo a chi arriva con ?facile=1 in un link). Per
+  // riattivarli, rimetti questo valore a true: nessun'altra modifica serve.
+  var MOSTRA_SELETTORE_MODALITA = false;
+
   var root = document.getElementById('tappa-root');
   var currentTappa = null;
   var indiceTappe = []; // tutte le tappe del foglio (pubblicate o no): serve solo a sapere se esiste una "successiva"
@@ -58,7 +63,7 @@
     wrap.setAttribute('aria-label', 'Modalità di visualizzazione');
 
     var standardBtn = el('button', { className: 'mode-pill', text: 'Versione standard' });
-    var facileBtn = el('button', { className: 'mode-pill', text: 'Versione facile' });
+    var facileBtn = el('button', { className: 'mode-pill', text: 'Versione breve' });
     standardBtn.setAttribute('aria-pressed', String(!modalitaFacile));
     facileBtn.setAttribute('aria-pressed', String(modalitaFacile));
     if (!modalitaFacile) standardBtn.classList.add('mode-pill--active');
@@ -88,7 +93,7 @@
     document.title = t.titolo + ' — Visita in biblioteca';
     root.innerHTML = '';
 
-    renderToggleModalita();
+    if (MOSTRA_SELETTORE_MODALITA) renderToggleModalita();
 
     root.appendChild(el('p', { className: 'eyebrow', text: 'Tappa ' + t.numero + ' di ' + totaleTappe }));
     root.appendChild(el('h1', { text: t.titolo }));
