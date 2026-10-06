@@ -26,7 +26,10 @@
 
       if (t.pubblicata) {
         var a = document.createElement('a');
-        a.href = '../q/' + pathDaNumero(t.numero) + '/';
+        // ?facile=0 forza sempre la versione standard, qualunque preferenza
+        // fosse rimasta salvata nel browser da una visita precedente — stesso
+        // motivo per cui "Inizia la visita" in home lo fa (vedi index.html).
+        a.href = '../q/' + pathDaNumero(t.numero) + '/?facile=0';
         a.innerHTML = '<span class="stop-number">' + numeroTxt + '</span> ' + t.titolo;
         li.appendChild(a);
       } else {
