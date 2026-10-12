@@ -14,6 +14,18 @@
   var API = window.APP_CONFIG.API_URL;
   var FEED_ACTION = document.body.getAttribute('data-feed') || 'tv';
   var FALLBACK_TITOLO = document.body.getAttribute('data-fallback-titolo');
+  var SCRIPT_SRC = document.currentScript && document.currentScript.src;
+
+  // -- Impostazioni da ritoccare a mano ----------------------------------------
+  // Pagina degli eventi: e' l'indirizzo del QR che accompagna le locandine, su
+  // entrambi gli schermi. Per cambiarlo basta modificare questa riga.
+  var EVENTI_URL = 'https://biblio.regione.vda.it/events/';
+  // Scritta fissa che accompagna le locandine sullo schermo ORIZZONTALE. Sul
+  // verticale la stessa scritta e' scritta direttamente in tv-verticale/index.html.
+  var EVENTI_TITOLO = 'Eventi delle Biblioteche del SBV';
+  // Orizzontale: scritta e QR compaiono di fianco a ogni locandina (e solo
+  // quando va in onda una locandina). Verticale: sono fissi nella pagina.
+  var EVENTI_ACCANTO_ALLA_LOCANDINA = (FEED_ACTION === 'tv');
   // La cache dello schermo orizzontale mantiene il nome storico; gli altri
   // schermi hanno una cache propria, cosi' non si scambiano mai i contenuti.
   var CACHE_KEY = 'vmb_tv_cache_v1' + (FEED_ACTION === 'tv' ? '' : '_' + FEED_ACTION);
@@ -144,6 +156,23 @@
     })();
   }
 
+  // -- QR degli eventi ----------------------------------------------------------
+
+  // Orizzontale: lo stile del blocco scritta+QR sta in un foglio a parte,
+  // caricato da qui (cosi' non occorre toccare tv/index.html ne' tv.css).
+  if (EVENTI_ACCANTO_ALLA_LOCANDINA) {
+    var linkStile = document.createElement('link');
+    linkStile.rel = 'stylesheet';
+    linkStile.href = SCRIPT_SRC ? new URL('../css/tv-locandine.css', SCRIPT_SRC).href
+                                : '../assets/css/tv-locandine.css';
+    document.head.appendChild(linkStile);
+  }
+
+  // Verticale: il QR e' un elemento fisso della pagina (#qr-eventi), che qui
+  // viene solo disegnato.
+  var qrEventiEl = document.getElementById('qr-eventi');
+  if (qrEventiEl) qrEventiEl.innerHTML = qrSvg(EVENTI_URL);
+
   // -- Dati: cache locale e feed --------------------------------------------------
 
   function loadCache() {
@@ -215,6 +244,20 @@
       poster.alt = (c.immagine && c.immagine.alt) || 'Locandina evento';
       if (c.immagine && c.immagine.url) poster.src = c.immagine.url;
       wrap.appendChild(poster);
+
+      if (EVENTI_ACCANTO_ALLA_LOCANDINA) {
+        // Schermo orizzontale: locandina a sinistra, a destra la scritta con il
+        // QR degli eventi (stile in assets/css/tv-locandine.css).
+        wrap.className = 'locandina-wrap locandina-wrap--con-qr';
+        var side = h('div', 'locandina-side');
+        side.appendChild(h('p', 'locandina-caption', EVENTI_TITOLO));
+        var qrBox = h('div', 'locandina-qr');
+        qrBox.setAttribute('role', 'img');
+        qrBox.setAttribute('aria-label', 'Codice QR per la pagina degli eventi');
+        qrBox.innerHTML = qrSvg(EVENTI_URL);
+        side.appendChild(qrBox);
+        wrap.appendChild(side);
+      }
       return { nodes: [wrap], conImmagine: false, poster: true };
     }
 
