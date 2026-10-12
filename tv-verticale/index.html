@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Canale TV verticale — Biblioteca</title>
+  <link rel="stylesheet" href="../assets/css/tv-verticale.css" />
+</head>
+<!-- data-feed: quale elenco leggere (solo locandine, tutte quelle idonee).
+     data-fallback-titolo: messaggio mostrato solo se non c'e' rete e non c'e'
+     nessuna sequenza salvata. -->
+<body data-feed="tv_verticale" data-fallback-titolo="Locandine in aggiornamento">
+  <div class="stage">
+    <main class="area" id="area" aria-live="off">
+      <div class="slide" id="slide"></div>
+      <p class="caption">Eventi delle Biblioteche del SBV</p>
+    </main>
+
+    <aside class="band" aria-label="Biblioteca regionale B. Salvadori">
+      <img class="band-logo" src="../assets/media/logo-biblioteca.png"
+           alt="Biblioteca regionale B. Salvadori" />
+    </aside>
+
+    <!-- Piè tecnico: visibile solo al personale (tasto "i" oppure ?staff=1) -->
+    <footer class="tech" id="tech" hidden></footer>
+  </div>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/vendor/qrcode.js"></script>
+  <script src="../assets/js/tv.js"></script>
+</body>
+</html>
