@@ -2,9 +2,21 @@
 // Legge il feed ?action=tv, ruota le schermate (TV-03, TV-07), rinnova i dati
 // ogni 5 minuti (TV-04), conserva l'ultima sequenza valida nel browser (TV-05)
 // e mostra sempre QR e URL nella fascia laterale (TV-02).
+//
+// Lo stesso file serve anche la pagina per lo schermo VERTICALE (solo
+// locandine, senza QR). Le differenze si dichiarano sul <body> della pagina:
+//   data-feed="tv_verticale"          -> quale feed leggere (predefinito: "tv")
+//   data-fallback-titolo="..."        -> messaggio di emergenza neutro, senza
+//                                        riferimenti a un QR che li' non c'e'
+// e, se la pagina non ha gli elementi #qr e #url, QR e indirizzo non vengono
+// generati.
 (function () {
   var API = window.APP_CONFIG.API_URL;
-  var CACHE_KEY = 'vmb_tv_cache_v1';
+  var FEED_ACTION = document.body.getAttribute('data-feed') || 'tv';
+  var FALLBACK_TITOLO = document.body.getAttribute('data-fallback-titolo');
+  // La cache dello schermo orizzontale mantiene il nome storico; gli altri
+  // schermi hanno una cache propria, cosi' non si scambiano mai i contenuti.
+  var CACHE_KEY = 'vmb_tv_cache_v1' + (FEED_ACTION === 'tv' ? '' : '_' + FEED_ACTION);
   var REFRESH_MS = 5 * 60 * 1000;   // TV-04: aggiornamento entro 10 minuti
   var FETCH_TIMEOUT_MS = 20000;
   var DEFAULT_S = 15;               // durata predefinita (doc 03 §4)
@@ -31,7 +43,12 @@
   };
 
   // Schermata locale di emergenza: sempre disponibile, anche senza rete né cache.
-  var FALLBACK = [{
+  var FALLBACK = FALLBACK_TITOLO ? [{
+    // Schermo senza QR (es. verticale): messaggio neutro, mai "inquadra il codice".
+    id: 'fallback', tipo: 'messaggio',
+    titolo: FALLBACK_TITOLO, sottotitolo: '',
+    testo: '', ordine: 1, durata_s: INVITO_S, inizio_ms: null, fine_ms: null,
+  }] : [{
     id: 'fallback', tipo: 'invito',
     titolo: 'Scopri la biblioteca in 15 minuti',
     sottotitolo: 'Sei tappe tra spazi, raccolte e servizi',
@@ -105,24 +122,27 @@
     urlEl.textContent = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
   }
 
-  mostraUrlVisita(URL_PRODUZIONE); // visibile da subito, anche offline
+  // Pagine senza fascia QR (es. schermo verticale): niente QR, niente indirizzo.
+  if (qrEl && urlEl) {
+    mostraUrlVisita(URL_PRODUZIONE); // visibile da subito, anche offline
 
-  (function caricaDominioConfigurato() {
-    try {
-      var cached = window.localStorage.getItem(CONFIG_CACHE_KEY);
-      if (cached) mostraUrlVisita(cached);
-    } catch (e) {}
+    (function caricaDominioConfigurato() {
+      try {
+        var cached = window.localStorage.getItem(CONFIG_CACHE_KEY);
+        if (cached) mostraUrlVisita(cached);
+      } catch (e) {}
 
-    fetch(API + '?action=config')
-      .then(function (res) { return res.ok ? res.json() : null; })
-      .then(function (cfg) {
-        var dominio = cfg && cfg.dominio;
-        if (!dominio) return;
-        mostraUrlVisita(dominio);
-        try { window.localStorage.setItem(CONFIG_CACHE_KEY, dominio); } catch (e) {}
-      })
-      .catch(function () { /* resta l'indirizzo di produzione gia' mostrato */ });
-  })();
+      fetch(API + '?action=config')
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (cfg) {
+          var dominio = cfg && cfg.dominio;
+          if (!dominio) return;
+          mostraUrlVisita(dominio);
+          try { window.localStorage.setItem(CONFIG_CACHE_KEY, dominio); } catch (e) {}
+        })
+        .catch(function () { /* resta l'indirizzo di produzione gia' mostrato */ });
+    })();
+  }
 
   // -- Dati: cache locale e feed --------------------------------------------------
 
@@ -150,7 +170,7 @@
     var ctrl = 'AbortController' in window ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, FETCH_TIMEOUT_MS);
 
-    return fetch(API + '?action=tv', ctrl ? { signal: ctrl.signal } : {})
+    return fetch(API + '?action=' + FEED_ACTION, ctrl ? { signal: ctrl.signal } : {})
       .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();
