@@ -1,0 +1,141 @@
+/* Canale TV VERTICALE — layout progettato su 1080x1920 (monitor in verticale)
+   e scalato con l'unita' --u. Tutti i valori sono espressi in "pixel di
+   riferimento" su quello schermo. Stessa impostazione dello schermo
+   orizzontale: area variabile blu a sinistra, fascia fissa bianca a destra. */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Public+Sans:wght@400;700&display=swap');
+
+:root {
+  --u: min(calc(100vw / 1080), calc(100vh / 1920));
+  --bg: #1b2733;
+  --paper: #faf8f3;
+  --ink: #22303c;
+  --brass-light: #d9b77a;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'Public Sans', -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #0f171f; /* bordi neri se lo schermo non e' esattamente 9:16 */
+  cursor: none;
+  user-select: none;
+}
+
+.stage {
+  position: relative;
+  width: calc(var(--u) * 1080);
+  height: calc(var(--u) * 1920);
+  margin: 0 auto;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  grid-template-columns: 80% 20%;   /* area variabile | fascia fissa */
+  background: var(--bg);
+  color: var(--paper);
+  font-family: var(--font-body);
+  overflow: hidden;
+}
+
+/* -- Area variabile: locandina + scritta sotto ---------------------------- */
+
+.area {
+  position: relative;
+  padding: calc(var(--u) * 40) calc(var(--u) * 28);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 40);
+}
+
+/* Spazio riservato alla locandina, di altezza fissa: cosi' la scritta sotto
+   resta sempre nello stesso punto. La locandina poggia sul fondo di questo
+   spazio, quindi e' sempre attaccata alla scritta, qualunque sia la sua forma. */
+.slide {
+  width: 100%;
+  height: calc(var(--u) * 1180);   /* aumenta/diminuisci per l'altezza massima della locandina */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 450ms ease;
+}
+.slide.is-out { opacity: 0; }
+
+.locandina-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.locandina-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;   /* la locandina e' sempre mostrata intera, mai ritagliata */
+  border-radius: calc(var(--u) * 6);
+  box-shadow: 0 calc(var(--u) * 6) calc(var(--u) * 24) rgba(0, 0, 0, 0.35);
+}
+
+/* Scritta fissa sotto le locandine */
+.caption {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: calc(var(--u) * 44);
+  line-height: 1.2;
+  text-align: center;
+  color: var(--paper);
+}
+
+/* Schermata di emergenza (solo senza rete e senza dati salvati) */
+.slide-text { margin: auto; text-align: center; }
+.slide-text .label { margin: 0; }
+.slide-text .title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: calc(var(--u) * 60);
+  line-height: 1.15;
+  color: var(--brass-light);
+}
+
+/* -- Fascia fissa: solo il logo ------------------------------------------- */
+
+.band {
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--u) * 20);
+}
+.band-logo {
+  max-width: 92%;
+  max-height: calc(var(--u) * 620);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* -- Piè tecnico (solo personale) ----------------------------------------- */
+
+.tech {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: calc(var(--u) * 8) calc(var(--u) * 16);
+  font-size: calc(var(--u) * 22);
+  color: #fff;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide { transition: none; }
+}
