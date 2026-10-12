@@ -1,0 +1,50 @@
+/* Locandine sullo schermo TV ORIZZONTALE: locandina a sinistra, a destra la
+   scritta fissa con il QR della pagina degli eventi. Caricato da assets/js/tv.js.
+   Le misure sono in "pixel di riferimento" Full HD (1920x1080), come in tv.css.
+   Scritta e indirizzo del QR si cambiano in cima a tv.js (EVENTI_TITOLO, EVENTI_URL). */
+
+.locandina-wrap.locandina-wrap--con-qr {
+  height: auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 60);          /* spazio tra locandina e blocco scritta+QR */
+}
+
+/* La locandina mantiene la sua altezza massima; la larghezza e' limitata
+   perche' resti sempre spazio per il blocco a destra. */
+.locandina-wrap.locandina-wrap--con-qr .locandina-img {
+  flex: 0 0 auto;
+  max-width: calc(var(--u) * 760);
+  max-height: calc(var(--u) * 900);
+}
+
+.locandina-side {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 36);          /* spazio tra scritta e QR */
+  text-align: center;
+}
+
+.locandina-caption {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: calc(var(--u) * 46);
+  line-height: 1.2;
+  color: var(--paper);
+}
+
+.locandina-qr {
+  flex: none;
+  width: calc(var(--u) * 340);       /* lato del QR */
+  height: calc(var(--u) * 340);
+  padding: calc(var(--u) * 16);      /* margine bianco attorno al codice */
+  background: #fff;
+  border-radius: calc(var(--u) * 8);
+}
+.locandina-qr svg { width: 100%; height: 100%; display: block; }

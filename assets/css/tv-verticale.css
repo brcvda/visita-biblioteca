@@ -95,6 +95,17 @@ html, body {
   color: var(--paper);
 }
 
+/* QR della pagina degli eventi, sotto la scritta */
+.caption-qr {
+  flex: none;
+  width: calc(var(--u) * 300);       /* lato del QR */
+  height: calc(var(--u) * 300);
+  padding: calc(var(--u) * 14);      /* margine bianco attorno al codice */
+  background: #fff;
+  border-radius: calc(var(--u) * 8);
+}
+.caption-qr svg { width: 100%; height: 100%; display: block; }
+
 /* Schermata di emergenza (solo senza rete e senza dati salvati) */
 .slide-text { margin: auto; text-align: center; }
 .slide-text .label { margin: 0; }
