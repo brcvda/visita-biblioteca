@@ -288,3 +288,37 @@ textarea {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* Intestazione compatta con logo affiancato al titolo (Opzione A) */
+.header-lockup {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.brand-logo-link {
+  display: block;
+  flex: 0 0 auto;
+  line-height: 0;
+  text-decoration: none;
+}
+
+.brand-logo {
+  height: clamp(80px, 20vw, 105px);
+  width: auto;
+  display: block;
+}
+
+.header-lockup__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.header-lockup__text .eyebrow {
+  margin: 0 0 0.25rem;
+}
+
+.header-lockup__text h1 {
+  margin: 0;
+}
