@@ -99,7 +99,7 @@
     var lockup = el('div', { className: 'header-lockup' });
     var logoLink = el('a', { className: 'brand-logo-link' });
     logoLink.href = '../../';
-    logoLink.setAttribute('aria-label', 'Torna alla home');
+    logoLink.setAttribute('aria-label', 'Torna alla pagina iniziale');
     var logoImg = document.createElement('img');
     logoImg.className = 'brand-logo';
     logoImg.src = '../../assets/media/logo-biblioteca.png';
@@ -115,6 +115,19 @@
     root.appendChild(lockup);
 
     if (t.sottotitolo) root.appendChild(el('p', { className: 'subtitle', text: t.sottotitolo }));
+
+    if (t.immagine && t.immagine.url) {
+      var frame = el('div', { className: 'image-frame' + (modalitaFacile ? ' image-frame--grande' : '') });
+      var img = document.createElement('img');
+      img.src = t.immagine.url;
+      img.alt = t.immagine.alt || '';
+      img.loading = 'lazy';
+      frame.appendChild(img);
+      root.appendChild(frame);
+    }
+
+    var testoPrincipale = modalitaFacile && t.testo_facile ? t.testo_facile : t.testo;
+    root.appendChild(el('p', { text: testoPrincipale }));
 
     // Audio: nessun autoplay, avviato solo su azione esplicita (FR-004)
     if (t.audio && t.audio.url) {
