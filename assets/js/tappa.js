@@ -95,22 +95,26 @@
 
     if (MOSTRA_SELETTORE_MODALITA) renderToggleModalita();
 
-    root.appendChild(el('p', { className: 'eyebrow', text: 'Tappa ' + t.numero + ' di ' + totaleTappe }));
-    root.appendChild(el('h1', { text: t.titolo }));
+    // Blocco intestazione con logo a sinistra e titolo affiancato
+    var lockup = el('div', { className: 'header-lockup' });
+    var logoLink = el('a', { className: 'brand-logo-link' });
+    logoLink.href = '../../';
+    logoLink.setAttribute('aria-label', 'Torna alla home');
+    var logoImg = document.createElement('img');
+    logoImg.className = 'brand-logo';
+    logoImg.src = '../../assets/media/logo-biblioteca.png';
+    logoImg.alt = 'Biblioteca regionale B. Salvadori';
+    logoLink.appendChild(logoImg);
+    lockup.appendChild(logoLink);
+
+    var textCol = el('div', { className: 'header-lockup__text' });
+    textCol.appendChild(el('p', { className: 'eyebrow', text: 'Tappa ' + t.numero + ' di ' + totaleTappe }));
+    textCol.appendChild(el('h1', { text: t.titolo }));
+    lockup.appendChild(textCol);
+
+    root.appendChild(lockup);
+
     if (t.sottotitolo) root.appendChild(el('p', { className: 'subtitle', text: t.sottotitolo }));
-
-    if (t.immagine && t.immagine.url) {
-      var frame = el('div', { className: 'image-frame' + (modalitaFacile ? ' image-frame--grande' : '') });
-      var img = document.createElement('img');
-      img.src = t.immagine.url;
-      img.alt = t.immagine.alt || '';
-      img.loading = 'lazy';
-      frame.appendChild(img);
-      root.appendChild(frame);
-    }
-
-    var testoPrincipale = modalitaFacile && t.testo_facile ? t.testo_facile : t.testo;
-    root.appendChild(el('p', { text: testoPrincipale }));
 
     // Audio: nessun autoplay, avviato solo su azione esplicita (FR-004)
     if (t.audio && t.audio.url) {
